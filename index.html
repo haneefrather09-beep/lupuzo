@@ -77,9 +77,30 @@ body{font-family:'DM Sans',sans-serif;background:var(--dark);color:var(--text);m
 .preview-label{font-family:'Syne',sans-serif;font-size:10px;letter-spacing:2px;color:#6b7280;text-transform:uppercase;margin-bottom:12px;font-weight:700}
 
 /* ── PDF DOCUMENT ── */
-#pdfDoc{width:794px;background:white;box-shadow:0 8px 40px rgba(0,0,0,.25);font-family:'DM Sans',sans-serif;color:#1a1a2e;min-height:1123px}
+#pdfDoc{
+  width:794px;
+  background:white;
+  box-shadow:0 8px 40px rgba(0,0,0,.25);
+  font-family:'DM Sans',sans-serif;
+  color:#1a1a2e;
+  /* No fixed min-height — let content grow freely for multi-page */
+  padding-bottom: 0;
+}
 
-.pdf-header{padding:28px 32px 20px;display:flex;justify-content:space-between;align-items:flex-start}
+/* ── PAGE BREAK RULES (for html2pdf multi-page) ── */
+.pdf-header        { page-break-inside: avoid; break-inside: avoid; }
+.pdf-meta          { page-break-inside: avoid; break-inside: avoid; }
+.pdf-parties       { page-break-inside: avoid; break-inside: avoid; }
+.pdf-section-title { page-break-after: avoid;  break-after: avoid;  }
+.pdf-table         { page-break-inside: auto;  break-inside: auto;  }
+.pdf-table tbody tr{ page-break-inside: avoid; break-inside: avoid; }
+.pdf-totals        { page-break-inside: avoid; break-inside: avoid; }
+.pdf-bottom        { page-break-inside: avoid; break-inside: avoid; }
+.pdf-signatures    { page-break-inside: avoid; break-inside: avoid; }
+.pdf-footer        { page-break-inside: avoid; break-inside: avoid; }
+#pdfNotesSection   { page-break-inside: avoid; break-inside: avoid; }
+
+.pdf-header{padding:28px 32px 20px;display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #0f3460}
 .pdf-logo-area{display:flex;align-items:center;gap:14px}
 #pdfLogoImg{max-height:60px;max-width:140px;display:none;border-radius:6px}
 .pdf-company-name{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;line-height:1.1}
@@ -88,13 +109,13 @@ body{font-family:'DM Sans',sans-serif;background:var(--dark);color:var(--text);m
 .pdf-qt-label .qt-title{font-family:'Syne',sans-serif;font-size:30px;font-weight:800;letter-spacing:1px}
 .pdf-qt-label .qt-sub{font-size:11px;color:#6b7280;margin-top:4px}
 
-.pdf-meta{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin:0 32px 20px;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden}
+.pdf-meta{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin:16px 32px;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden}
 .pdf-meta-item{padding:10px 14px;background:#f9fafb;border-right:1px solid #e5e7eb}
 .pdf-meta-item:last-child{border-right:none}
 .pdf-meta-item .ml{font-size:9px;color:#9ca3af;text-transform:uppercase;letter-spacing:1px;font-weight:600;margin-bottom:3px}
 .pdf-meta-item .mv{font-size:13px;font-weight:600;color:#1a1a2e}
 
-.pdf-parties{display:grid;grid-template-columns:1fr 1fr;gap:0;margin:0 32px 20px;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden}
+.pdf-parties{display:grid;grid-template-columns:1fr 1fr;gap:0;margin:0 32px 16px;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden}
 .pdf-party{padding:14px 18px}
 .pdf-party:first-child{border-right:1px solid #e5e7eb}
 .party-label{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;padding-bottom:6px;border-bottom:2px solid}
@@ -103,27 +124,58 @@ body{font-family:'DM Sans',sans-serif;background:var(--dark);color:var(--text);m
 
 .pdf-section-title{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin:0 32px 10px;padding-bottom:6px;border-bottom:2px solid}
 
-.pdf-table{width:calc(100% - 64px);margin:0 32px 16px;border-collapse:collapse;border-radius:10px;overflow:hidden;border:1px solid #e5e7eb}
+/* ── TABLE with fixed-layout for column control ── */
+.pdf-table{
+  width:calc(100% - 64px);
+  margin:0 32px 16px;
+  border-collapse:collapse;
+  border-radius:10px;
+  overflow:hidden;
+  border:1px solid #e5e7eb;
+  table-layout:fixed;   /* KEY: prevents columns from growing unbounded */
+  word-wrap:break-word;
+}
+.pdf-table col.col-no   { width: 36px; }
+.pdf-table col.col-name { width: 160px; }
+.pdf-table col.col-desc { width: auto; }   /* takes remaining space */
+.pdf-table col.col-dur  { width: 80px; }
+.pdf-table col.col-price{ width: 90px; }
+
 .pdf-table thead tr{color:white}
-.pdf-table thead th{padding:10px 14px;font-size:11px;font-weight:600;text-align:left;letter-spacing:.5px}
-.pdf-table tbody td{padding:10px 14px;font-size:12px;border-bottom:1px solid #f3f4f6;vertical-align:top}
+.pdf-table thead th{
+  padding:10px 14px;
+  font-size:11px;
+  font-weight:600;
+  text-align:left;
+  letter-spacing:.5px;
+  word-break:break-word;
+}
+.pdf-table tbody td{
+  padding:10px 14px;
+  font-size:12px;
+  border-bottom:1px solid #f3f4f6;
+  vertical-align:top;
+  word-break:break-word;    /* long words wrap */
+  overflow-wrap:break-word;
+  white-space:pre-wrap;     /* respects newlines, wraps long lines */
+}
 .pdf-table tbody tr:last-child td{border-bottom:none}
 .pdf-table tbody tr:nth-child(odd){background:#f9fafb}
-.pdf-table .price-col{font-weight:700;text-align:right}
+.pdf-table .price-col{font-weight:700;text-align:right;white-space:nowrap}
 
-.pdf-totals{margin:0 32px 20px;display:flex;justify-content:flex-end}
+.pdf-totals{margin:0 32px 16px;display:flex;justify-content:flex-end}
 .totals-box{width:260px}
 .total-row{display:flex;justify-content:space-between;padding:6px 0;font-size:13px;border-bottom:1px solid #f3f4f6}
 .total-row.grand{padding:10px 14px;border-radius:8px;color:white;font-weight:700;font-size:15px;border:none;margin-top:6px}
 
-.pdf-bottom{display:grid;grid-template-columns:1fr 1fr;gap:0;margin:0 32px 20px;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden}
+.pdf-bottom{display:grid;grid-template-columns:1fr 1fr;gap:0;margin:0 32px 16px;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden}
 .pdf-bottom-section{padding:14px 18px}
 .pdf-bottom-section:first-child{border-right:1px solid #e5e7eb}
 .pdf-bottom-section h4{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid #e5e7eb}
 .pdf-bottom-section p,.pdf-bottom-section li{font-size:11px;color:#374151;line-height:1.7}
 .pdf-bottom-section ul{padding-left:14px}
 
-.pdf-signatures{display:grid;grid-template-columns:1fr 1fr;gap:0;margin:0 32px 0;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden}
+.pdf-signatures{display:grid;grid-template-columns:1fr 1fr;gap:0;margin:0 32px 16px;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden}
 .sig-box{padding:14px 18px}
 .sig-box:first-child{border-right:1px solid #e5e7eb}
 .sig-box .sig-label{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#9ca3af;margin-bottom:10px}
@@ -132,7 +184,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--dark);color:var(--text);m
 .sig-box .sig-name{font-size:12px;font-weight:600}
 .sig-box .sig-date{font-size:11px;color:#9ca3af;margin-top:2px}
 
-.pdf-footer{margin:0;padding:12px 32px;text-align:center;color:white;font-size:11px}
+.pdf-footer{padding:12px 32px;text-align:center;color:white;font-size:11px}
 
 /* Status badge */
 .status-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;letter-spacing:.5px}
@@ -397,9 +449,17 @@ body{font-family:'DM Sans',sans-serif;background:var(--dark);color:var(--text);m
     <!-- Services -->
     <div class="pdf-section-title" id="svcSectionTitle" style="color:#0f3460;border-color:#0f3460">Services & Pricing</div>
     <table class="pdf-table">
+      <!-- col widths control description overflow -->
+      <colgroup>
+        <col class="col-no">
+        <col class="col-name">
+        <col class="col-desc">
+        <col class="col-dur">
+        <col class="col-price">
+      </colgroup>
       <thead>
         <tr id="tableHeader" style="background:#0f3460">
-          <th style="width:30px">#</th>
+          <th>#</th>
           <th>Service</th>
           <th>Description</th>
           <th>Duration</th>
@@ -434,13 +494,13 @@ body{font-family:'DM Sans',sans-serif;background:var(--dark);color:var(--text);m
     </div>
 
     <!-- Notes -->
-    <div id="pdfNotesSection" style="margin:12px 32px 0;padding:10px 14px;background:#f9fafb;border-radius:8px;border:1px solid #e5e7eb;display:none">
+    <div id="pdfNotesSection" style="margin:0 32px 16px;padding:10px 14px;background:#f9fafb;border-radius:8px;border:1px solid #e5e7eb;display:none">
       <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#9ca3af;margin-bottom:4px">Note</div>
-      <div id="pdfNotes" style="font-size:12px;color:#374151"></div>
+      <div id="pdfNotes" style="font-size:12px;color:#374151;white-space:pre-wrap;word-wrap:break-word"></div>
     </div>
 
     <!-- Signatures -->
-    <div class="pdf-signatures" style="margin-top:16px">
+    <div class="pdf-signatures">
       <div class="sig-box">
         <div class="sig-label">Client Signature & Stamp</div>
         <div class="sig-line"></div>
@@ -497,7 +557,7 @@ function renderServicesList(){
         <input value="${s.name}" oninput="services[${i}].name=this.value;update()">
       </div>
       <div class="field"><label>Description</label>
-        <textarea oninput="services[${i}].desc=this.value;update()">${s.desc}</textarea>
+        <textarea style="min-height:80px" oninput="services[${i}].desc=this.value;update()">${s.desc}</textarea>
       </div>
       <div class="row2">
         <div class="field"><label>Duration</label>
@@ -526,15 +586,15 @@ function setColor(color, dark, el){
   update();
 }
 function applyTheme(){
-  const els = ['pdfQtTitle','fromLabel','toLabel','svcSectionTitle','payH4','termsH4'];
-  els.forEach(id=>{
+  const colorEls = ['pdfQtTitle','fromLabel','toLabel','svcSectionTitle','payH4','termsH4'];
+  colorEls.forEach(id=>{
     const el=document.getElementById(id);
-    if(el){el.style.color=themeColor;if(el.style.borderColor!==undefined)el.style.borderColor=themeColor;}
+    if(el){ el.style.color=themeColor; if('borderColor' in el.style) el.style.borderColor=themeColor; }
   });
-  document.getElementById('tableHeader').style.background=themeColor;
-  document.getElementById('pdfGrandRow').style.background=themeColor;
-  document.getElementById('pdfFooter').style.background=themeDark;
-  document.getElementById('pdfHeader').style.borderBottom='3px solid '+themeColor;
+  document.getElementById('tableHeader').style.background = themeColor;
+  document.getElementById('pdfGrandRow').style.background  = themeColor;
+  document.getElementById('pdfFooter').style.background    = themeDark;
+  document.getElementById('pdfHeader').style.borderBottomColor = themeColor;
 }
 
 // ── LOGO ──
@@ -591,129 +651,170 @@ function uploadSig(input){
 
 // ── MAIN UPDATE ──
 function update(){
-  const cur=v=>document.getElementById(v).value;
+  const cur=id=>document.getElementById(id).value;
   const currency=cur('currency')||'Rs.';
 
   // Company
-  document.getElementById('pdfCompanyName').textContent=cur('companyName')||'Lupuzo';
-  document.getElementById('pdfTagline').textContent=cur('tagline');
-  document.getElementById('pdfContact').textContent=`${cur('yourEmail')} | ${cur('yourAddress')}`;
-  document.getElementById('pdfFromName').textContent=cur('companyName')||'Lupuzo';
-  document.getElementById('pdfFromDetail').innerHTML=`${cur('tagline')}<br>${cur('yourPhone')} | ${cur('yourEmail')}<br>${cur('yourAddress')}`;
-  document.getElementById('pdfFooterCompany').textContent=cur('companyName')||'Lupuzo';
-  document.getElementById('pdfFooterEmail').textContent=cur('yourEmail');
-  document.getElementById('pdfYourSigName').textContent=cur('companyName')||'Lupuzo';
+  document.getElementById('pdfCompanyName').textContent  = cur('companyName')||'Lupuzo';
+  document.getElementById('pdfTagline').textContent       = cur('tagline');
+  document.getElementById('pdfContact').textContent       = `${cur('yourEmail')} | ${cur('yourAddress')}`;
+  document.getElementById('pdfFromName').textContent      = cur('companyName')||'Lupuzo';
+  document.getElementById('pdfFromDetail').innerHTML      = `${cur('tagline')}<br>${cur('yourPhone')} | ${cur('yourEmail')}<br>${cur('yourAddress')}`;
+  document.getElementById('pdfFooterCompany').textContent = cur('companyName')||'Lupuzo';
+  document.getElementById('pdfFooterEmail').textContent   = cur('yourEmail');
+  document.getElementById('pdfYourSigName').textContent   = cur('companyName')||'Lupuzo';
 
   // Quotation details
-  document.getElementById('pdfQtNo').textContent='# '+cur('qtNo');
-  document.getElementById('pdfQtNo2').textContent=cur('qtNo');
-  const dt=cur('qtDate');
-  const formatted=dt?new Date(dt+' ').toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}):'—';
-  document.getElementById('pdfDate').textContent=formatted;
-  document.getElementById('pdfSigDate').textContent=formatted;
-  document.getElementById('pdfValid').textContent=cur('validUntil');
+  document.getElementById('pdfQtNo').textContent  = '# '+cur('qtNo');
+  document.getElementById('pdfQtNo2').textContent = cur('qtNo');
+  const dt = cur('qtDate');
+  const formatted = dt ? new Date(dt+' ').toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}) : '—';
+  document.getElementById('pdfDate').textContent    = formatted;
+  document.getElementById('pdfSigDate').textContent = formatted;
+  document.getElementById('pdfValid').textContent   = cur('validUntil');
 
   // Status
-  const statusMap={pending:'PENDING',approved:'APPROVED',sent:'SENT'};
-  const statusClass={pending:'status-pending',approved:'status-approved',sent:'status-sent'};
-  const st=cur('qtStatus');
-  const sb=document.getElementById('pdfStatus');
-  sb.textContent=statusMap[st];sb.className='status-badge '+statusClass[st];
+  const statusMap   = {pending:'PENDING',approved:'APPROVED',sent:'SENT'};
+  const statusClass = {pending:'status-pending',approved:'status-approved',sent:'status-sent'};
+  const st = cur('qtStatus');
+  const sb = document.getElementById('pdfStatus');
+  sb.textContent = statusMap[st]; sb.className = 'status-badge '+statusClass[st];
 
   // Client
-  const cn=cur('clientName')||'Client Name';
-  document.getElementById('pdfClientName').textContent=cn;
-  document.getElementById('pdfClientSigName').textContent=cn;
-  document.getElementById('pdfClientDetail').innerHTML=
+  const cn = cur('clientName')||'Client Name';
+  document.getElementById('pdfClientName').textContent    = cn;
+  document.getElementById('pdfClientSigName').textContent = cn;
+  document.getElementById('pdfClientDetail').innerHTML =
     `${cur('clientCompany')||'Company'}<br>${cur('clientPhone')||'Phone'} | ${cur('clientEmail')||'Email'}<br>${cur('clientCity')||'City'}`;
 
-  // Services table
-  let subtotal=0;
-  let rows='';
+  // Services table — description is kept as plain text (pre-wrap handles newlines via CSS)
+  let subtotal = 0;
+  let rows = '';
   services.forEach((s,i)=>{
-    const price=parseFloat(s.price)||0;
-    subtotal+=price;
-    const descLines=s.desc.replace(/\n/g,'<br>');
-    rows+=`<tr>
+    const price = parseFloat(s.price)||0;
+    subtotal += price;
+    rows += `<tr>
       <td style="color:#6b7280;font-weight:600">${String(i+1).padStart(2,'0')}</td>
       <td style="font-weight:600;color:#1a1a2e">${s.name}</td>
-      <td style="color:#6b7280;font-size:11px">${descLines}</td>
-      <td style="color:#6b7280">${s.duration}</td>
-      <td class="price-col" style="color:${themeColor}">${price>0?currency+' '+price.toLocaleString('en-IN'):'—'}</td>
+      <td style="color:#6b7280;font-size:11px">${s.desc}</td>
+      <td style="color:#6b7280;white-space:nowrap">${s.duration}</td>
+      <td class="price-col" style="color:${themeColor};white-space:nowrap">${price>0 ? currency+' '+price.toLocaleString('en-IN') : '—'}</td>
     </tr>`;
   });
-  document.getElementById('pdfTableBody').innerHTML=rows;
+  document.getElementById('pdfTableBody').innerHTML = rows;
 
   // Totals
-  const discount=parseFloat(cur('discount'))||0;
-  const gstPct=parseFloat(cur('gst'))||0;
-  const afterDiscount=subtotal-discount;
-  const gstAmt=(afterDiscount*gstPct)/100;
-  const grand=afterDiscount+gstAmt;
-  document.getElementById('pdfSubtotal').textContent=currency+' '+subtotal.toLocaleString('en-IN');
-  document.getElementById('pdfDiscount').textContent='- '+currency+' '+discount.toLocaleString('en-IN');
-  document.getElementById('pdfGstLabel').textContent=`GST (${gstPct}%)`;
-  document.getElementById('pdfGstAmt').textContent=currency+' '+Math.round(gstAmt).toLocaleString('en-IN');
-  document.getElementById('pdfGrandTotal').textContent=currency+' '+Math.round(grand).toLocaleString('en-IN');
+  const discount  = parseFloat(cur('discount'))||0;
+  const gstPct    = parseFloat(cur('gst'))||0;
+  const afterDisc = subtotal - discount;
+  const gstAmt    = (afterDisc * gstPct) / 100;
+  const grand     = afterDisc + gstAmt;
+  document.getElementById('pdfSubtotal').textContent  = currency+' '+subtotal.toLocaleString('en-IN');
+  document.getElementById('pdfDiscount').textContent  = '- '+currency+' '+discount.toLocaleString('en-IN');
+  document.getElementById('pdfGstLabel').textContent  = `GST (${gstPct}%)`;
+  document.getElementById('pdfGstAmt').textContent    = currency+' '+Math.round(gstAmt).toLocaleString('en-IN');
+  document.getElementById('pdfGrandTotal').textContent= currency+' '+Math.round(grand).toLocaleString('en-IN');
 
   // Payment
   const bank=cur('bankName'),acc=cur('accountNo'),ifsc=cur('ifsc'),upi=cur('upi');
   let payHtml='';
-  if(bank)payHtml+=`<div><b>Bank:</b> ${bank}</div>`;
-  if(acc)payHtml+=`<div><b>Account:</b> ${acc}</div>`;
-  if(ifsc)payHtml+=`<div><b>IFSC:</b> ${ifsc}</div>`;
-  if(upi)payHtml+=`<div><b>UPI:</b> ${upi}</div>`;
-  document.getElementById('pdfPayment').innerHTML=payHtml||'Fill payment details in the editor';
+  if(bank) payHtml+=`<div><b>Bank:</b> ${bank}</div>`;
+  if(acc)  payHtml+=`<div><b>Account:</b> ${acc}</div>`;
+  if(ifsc) payHtml+=`<div><b>IFSC:</b> ${ifsc}</div>`;
+  if(upi)  payHtml+=`<div><b>UPI:</b> ${upi}</div>`;
+  document.getElementById('pdfPayment').innerHTML = payHtml||'Fill payment details in the editor';
 
-  // Terms
-  const termsText=cur('terms');
-  document.getElementById('pdfTerms').innerHTML=termsText.split('\n').filter(l=>l.trim()).map(l=>`<div style="margin-bottom:3px">${l}</div>`).join('');
+  // Terms — each line as a block div
+  const termsText = cur('terms');
+  document.getElementById('pdfTerms').innerHTML =
+    termsText.split('\n').filter(l=>l.trim()).map(l=>`<div style="margin-bottom:3px">${l}</div>`).join('');
 
   // Notes
-  const notes=cur('notes');
-  const notesSec=document.getElementById('pdfNotesSection');
-  if(notes.trim()){notesSec.style.display='block';document.getElementById('pdfNotes').textContent=notes;}
-  else{notesSec.style.display='none';}
+  const notes = cur('notes');
+  const notesSec = document.getElementById('pdfNotesSection');
+  if(notes.trim()){
+    notesSec.style.display='block';
+    document.getElementById('pdfNotes').textContent = notes;
+  } else {
+    notesSec.style.display='none';
+  }
 
   applyTheme();
 }
 
 // ── DOWNLOAD PDF ──
 function downloadPDF(){
-  const el=document.getElementById('pdfDoc');
-  const companyName=document.getElementById('companyName').value||'Lupuzo';
-  const qtNo=document.getElementById('qtNo').value||'QT-001';
-  const opt={
-    margin:[8,8,8,8],
-    filename:`${companyName}_${qtNo}.pdf`,
-    image:{type:'jpeg',quality:0.98},
-    html2canvas:{scale:2,useCORS:true,letterRendering:true},
-    jsPDF:{unit:'pt',format:'a4',orientation:'portrait'}
+  const original    = document.getElementById('pdfDoc');
+  const companyName = document.getElementById('companyName').value || 'Lupuzo';
+  const qtNo        = document.getElementById('qtNo').value        || 'QT-001';
+
+  const btn       = document.querySelector('.btn-gold');
+  btn.textContent = 'Generating\u2026'; btn.disabled = true;
+
+  /* ── Remember original DOM position ── */
+  const parent       = original.parentNode;
+  const sibling      = original.nextSibling;
+  const origStyleVal = original.style.cssText;
+
+  /* ── Hide topbar so it does not overlap the render ── */
+  const topbar      = document.querySelector('.topbar');
+  const savedTopbar = topbar.style.display;
+  topbar.style.display = 'none';
+
+  /* ── Isolated container at body origin (0,0) ── */
+  const container = document.createElement('div');
+  container.style.cssText = 'position:absolute;top:0;left:0;width:794px;background:#fff;z-index:99999;';
+  document.body.insertBefore(container, document.body.firstChild);
+
+  /* ── Move ACTUAL element (not clone) into the clean container ── */
+  container.appendChild(original);
+  original.style.cssText = 'width:794px;box-shadow:none;margin:0;';
+
+  /* ── Scroll window to very top ── */
+  window.scrollTo(0, 0);
+
+  const restore = () => {
+    original.style.cssText = origStyleVal;
+    if (sibling) parent.insertBefore(original, sibling);
+    else          parent.appendChild(original);
+    document.body.removeChild(container);
+    topbar.style.display = savedTopbar;
+    btn.textContent = '\u2b07 Download PDF'; btn.disabled = false;
   };
-  const btn=document.querySelector('.btn-gold');
-  btn.textContent='Generating...';btn.disabled=true;
-  html2pdf().set(opt).from(el).save().then(()=>{
-    btn.textContent='⬇ Download PDF';btn.disabled=false;
-  });
+
+  const opt = {
+    margin:      0,
+    filename:    `${companyName}_${qtNo}.pdf`,
+    image:       { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true, letterRendering: true,
+                   scrollX: 0, scrollY: 0, windowWidth: 794 },
+    jsPDF:       { unit: 'mm', format: 'a4', orientation: 'portrait' },
+    pagebreak:   { mode: ['css', 'legacy'] }
+  };
+
+  /* 3 frames: let DOM reflow + scroll settle before capture */
+  requestAnimationFrame(() => requestAnimationFrame(() => requestAnimationFrame(() => {
+    html2pdf().set(opt).from(original).save().then(restore).catch(restore);
+  })));
 }
 
 // ── RESET ──
 function resetForm(){
-  if(!confirm('Sab kuch reset ho jaayega. Sure hain?'))return;
-  document.getElementById('clientName').value='';
-  document.getElementById('clientCompany').value='';
-  document.getElementById('clientPhone').value='';
-  document.getElementById('clientEmail').value='';
-  document.getElementById('clientCity').value='';
-  document.getElementById('qtNo').value='QT-001';
-  document.getElementById('discount').value='0';
-  services=[
+  if(!confirm('Sab kuch reset ho jaayega. Sure hain?')) return;
+  document.getElementById('clientName').value    = '';
+  document.getElementById('clientCompany').value = '';
+  document.getElementById('clientPhone').value   = '';
+  document.getElementById('clientEmail').value   = '';
+  document.getElementById('clientCity').value    = '';
+  document.getElementById('qtNo').value          = 'QT-001';
+  document.getElementById('discount').value      = '0';
+  services = [
     {name:'Website Design',desc:'Responsive modern website\n5-10 pages, mobile friendly\nContact form + SEO ready',duration:'2-3 weeks',price:''},
     {name:'App Development',desc:'Android / iOS mobile app\nCustom features as needed\nAdmin panel included',duration:'4-6 weeks',price:''},
     {name:'Social Media Marketing',desc:'Instagram + Facebook management\nPosts, reels, stories\nMonthly reporting',duration:'Monthly',price:''},
     {name:'SEO Services',desc:'On-page + Off-page SEO\nGoogle ranking improvement\nKeyword research included',duration:'3-6 months',price:''}
   ];
-  renderServicesList();update();
+  renderServicesList(); update();
 }
 </script>
 </body>
